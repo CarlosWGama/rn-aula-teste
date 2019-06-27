@@ -1,12 +1,15 @@
 import * as React from 'react';
-import { View, StyleSheet, Text, Button, FlatList, Alert } from 'react-native';
+import { View, StyleSheet, Text, Button, FlatList, Alert, ToastAndroid } from 'react-native';
 import MyHeader from '../components/MyHeader';
 import {connect} from 'react-redux';
 import TarefaItem from '../components/tarefaItem';
+import { excluirTarefa } from '../store/tarefas/actions';
 
 interface AppProps {
   navigation: any;
-  usuario:string
+  usuario:string;
+  tarefas: {id:string, descricao:string, data:string}[];
+  excluirTarefa(id):Promise<any>;
 }
 
 interface AppState {
@@ -17,12 +20,21 @@ export class TarefaScreen extends React.Component<AppProps, AppState> {
   constructor(props) {
     super(props);
     this.state = {
-      tarefas:[
-        {id:"123", descricao:'Teste 1', data:'05/11/2019'},
-        {id:"122", descricao:'Teste 2', data:'22/11/2019'},
-        {id:"124", descricao:'Teste 3', data:'18/11/2019'},
-      ]
+      tarefas:[ ]
     };
+  }
+
+  componentDidMount() {
+    this.props.navigation.addListener('didFocus', () => {
+      this.setState({tarefas: this.props.tarefas})
+    })
+  }
+
+  excluirTarefa(id) {
+    this.props.excluirTarefa(id).then(() => {
+      this.setState({tarefas: this.props.tarefas})
+      ToastAndroid.show("Deletado!", 200);
+    })
   }
 
   public render() {
@@ -32,8 +44,9 @@ export class TarefaScreen extends React.Component<AppProps, AppState> {
           <Text>Tarefa - </Text>
           <FlatList 
             data={this.state.tarefas}
+            extraData={this.state}
             renderItem={({item}) => {
-              return (<TarefaItem tarefa={item} onEditar={(t) => this.props.navigation.navigate('tarefaEditar', {tarefaID: t.id})} onExcluir={(id) => Alert.alert(id)} />)
+              return (<TarefaItem tarefa={item} onEditar={(t) => this.props.navigation.navigate('tarefaEditar', {tarefaID: t.id})} onExcluir={(id) => this.excluirTarefa(id)} />)
             }
           }
             keyExtractor={(t) => t.id}
@@ -47,8 +60,20 @@ export class TarefaScreen extends React.Component<AppProps, AppState> {
   }
 }
 
-const mapStoreToProps = (store) => ({
-  usuario: store.usuarios.email
+const mapStateToProps = (store) => ({
+  usuario: store.usuarios.email,
+  tarefas: store.tarefas.tarefas
 })
 
-export default connect(mapStoreToProps, null) (TarefaScreen)
+const mapDispatchToProps = (dispatch) => ({
+  excluirTarefa: (id) => {
+    return new Promise(resolve => {
+      dispatch(excluirTarefa(id));
+
+      setTimeout(() => resolve(true), 1000)
+    })
+    
+  } 
+})
+
+export default connect(mapStateToProps, mapDispatchToProps) (TarefaScreen)

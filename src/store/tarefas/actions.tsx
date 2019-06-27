@@ -25,21 +25,24 @@ const initialState = {
     tarefas: []
 }
 
-export const reducerTarefas = (state = initialState, action: {type:string, data:any}) => {
+export const reducerTarefas = (state = initialState, action: {type:string, payload:any}) => {
     let newState = null;
     switch(action.type) {
-        case INSERIR_TAREFA: 
+        case INSERIR_TAREFA: {
             let tarefas = state.tarefas;
-            tarefas.push('Nova tarefa'); 
+            tarefas.push(action.payload); 
             newState = {...state, tarefas:tarefas};
             break;
-        case EDITAR_TAREFA: 
-            newState = {...state, tarefas:['Editou']};
+        } case EDITAR_TAREFA: { 
+            newState = {...state, tarefas:[{id:"1", descricao:'Edição', data:'2018-02-01'}]};
             break;
-        case EXCLUIR_TAREFA: 
-            newState = {...state, tarefas:[]};
+        } case EXCLUIR_TAREFA: { 
+            let { tarefas } = state;
+            let removeIndex = tarefas.map(t => t.id).indexOf(action.payload);
+            tarefas.splice(removeIndex, 1);
+            newState = {...state, tarefas};
             break;
-        default:
+        } default:
             newState = state;
     }
     return newState;

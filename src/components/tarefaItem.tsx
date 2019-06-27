@@ -3,6 +3,7 @@ import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Swipeable from 'react-native-swipeable';
 import { Icon } from 'react-native-elements';
 import { editarTarefa } from '../store/tarefas/actions';
+import { connect } from 'react-redux';
 
 export interface AppProps {
     tarefa:any
@@ -58,7 +59,7 @@ export default class TarefaItem extends React.Component<AppProps> {
         ]
         console.log("Descrição", this.props.tarefa.descricao);
         return (
-            <Swipeable leftContent={leftContainer} rightButtons={rightButtons} >
+            <Swipeable leftContent={leftContainer} rightButtons={rightButtons}  onLeftActionRelease={() => this.props.onExcluir(this.props.tarefa.id)} >
                 <View style={this.styles.container}>
                     <Text>A {this.props.tarefa.descricao}</Text>
                     <Text>B {this.props.tarefa.data}</Text>
